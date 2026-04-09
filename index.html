@@ -390,7 +390,7 @@ textarea.fi{resize:vertical;min-height:50px;}
 
 <div class="topbar">
   <div class="tb-title">
-    <span id="mainTitle" contenteditable="true" spellcheck="false" title="點擊編輯標題" style="cursor:text;border-bottom:1px dashed rgba(255,255,255,.4);padding-bottom:1px;outline:none;min-width:100px;display:inline-block;">勞工健康服務年度計畫甘特圖</span>
+    <span id="mainTitle" contenteditable="true" spellcheck="false" title="點擊編輯標題" style="cursor:text;border-bottom:1px dashed rgba(255,255,255,.4);padding-bottom:1px;outline:none;min-width:100px;display:inline-block;">職場健康服務年度計畫甘特圖</span>
   </div>
   <div class="yr-wrap">
     <button class="yr-btn" onclick="chgYear(-1)">◀</button>
@@ -739,13 +739,14 @@ try{const m=localStorage.getItem('lawMeta');if(m)lawMeta=JSON.parse(m);}catch{}
 // localStorage['gp_all'] = { currentProj: 'name', projects: { name: {year, items, nid} } }
 const DP=[
   {id:1,law:['art12'],cat:'健康服務行政管理',name:'勞工健康服務年度計畫檢討與制定',method:'制定本年度勞工健康服務年度計畫及評價',pers:['職安'],other:'',months:[1,12],target:'全員',color:0,checked:true,prog:{}},
-  {id:1,law:['art12'],cat:'健康服務行政管理',name:'勞工健康服務年度計畫評值',method:'依據年度執行成果進行計畫評值',pers:['特約護理'],other:'',months:[1,12],target:'',color:0,checked:true,prog:{}},
-  {id:2,law:['art16'],cat:'職場健康管理',name:'新進人員體格檢查',method:'新進人員一般體格檢查（依附表九）',pers:['職安'],other:'人資部門',months:[1,2,3,4,5,6,7,8,9,10,11,12],target:'新進人員',color:1,checked:true,prog:{}},
-  {id:4,law:['art18'],cat:'職場健康管理',name:'在職特作健康檢查',method:'實施從事特別危害健康作業人員特殊健康檢查（依附表十）',pers:['職安'],other:'相關單位主管',months:[5,6],target:'特作人員',color:1,checked:false,prog:{}},
-  {id:9,law:['art9k4','art23'],cat:'四大計畫',name:'母性健康保護管理',method:'辦理妊娠中及產後女性員工健康評估、職能評估與適性配工',pers:['職安','特約醫師'],other:'相關單位主管',months:[8,9],target:'母性保護對象',color:2,checked:false,prog:{}},
-  {id:11,law:['art9k6'],cat:'職場健康促進',name:'職場健康促進',method:'依據健檢分析結果、流行病學、時事，辦理健康促進活動',pers:['職安'],other:'',months:[3,6,9,12],target:'全員',color:4,checked:false,prog:{}},
+  {id:2,law:['art12'],cat:'健康服務行政管理',name:'勞工健康服務年度計畫評值',method:'依據年度執行成果進行計畫評值',pers:['特約護理'],other:'',months:[12],target:'',color:0,checked:true,prog:{}},
+  {id:3,law:['art16'],cat:'職場健康管理',name:'新進人員體格檢查',method:'新進人員一般體格檢查（依附表九）',pers:['職安'],other:'人資部門',months:[1,2,3,4,5,6,7,8,9,10,11,12],target:'新進人員',color:1,checked:true,prog:{}},
+  {id:4,law:['art18'],cat:'職場健康管理',name:'在職特作健康檢查',method:'實施從事特別危害健康作業人員特殊健康檢查（依附表十）',pers:['職安','特約護理'],other:'',months:[7,8],target:'特作人員',color:1,checked:false,prog:{}},
+  {id:5,law:['art18'],cat:'職場健康管理',name:'在職特作三級複判',method:'特別危害健康作業人員特殊健康檢查三級人員健康管理與複判',pers:['職安','特約職醫'],other:'',months:[9,10],target:'特作人員',color:1,checked:false,prog:{}},
+  {id:6,law:['art9','art9k4'],cat:'四大計畫',name:'母性健康保護管理',method:'辦理妊娠中及產後女性員工健康評估、職能評估與適性配工',pers:['職安','特約醫師'],other:'相關單位主管',months:[1,2,3,4,5,6,7,8,9,10,11,12],target:'母性保護對象',color:2,checked:false,prog:{}},
+  {id:7,law:['art9k6'],cat:'職場健康促進',name:'職場健康促進',method:'依據健檢分析結果、流行病學、時事，辦理健康促進活動',pers:['職安'],other:'',months:[3,6,9,12],target:'全員',color:4,checked:false,prog:{}},
 ];
-const DEFAULT_PROJ_NAME='預設專案';
+const DEFAULT_PROJ_NAME='範本';
 
 function _loadStore(){
   try{return JSON.parse(localStorage.getItem('gp_all'))||null;}catch{return null;}
@@ -1014,9 +1015,10 @@ function genGantt(){
 
       // Person — 3 separate tds, no repeated sub-labels
       const hasSafe=(p.pers||[]).includes('職安');
-      const hasDr=(p.pers||[]).includes('特約醫師');
+      const hasDr=(p.pers||[]).includes('特約職醫');
+      const hasDO=(p.pers||[]).includes('特約醫師');
       const hasNr=(p.pers||[]).includes('特約護理');
-      const teStr=[hasDr?'醫':'',hasNr?'護':''].filter(Boolean).join('/');
+      const teStr=[hasDr?'職醫':'',hasDO?'醫':'',hasNr?'護':''].filter(Boolean).join('.');
       const pSafe=`<td class="cd-person" style="text-align:center;font-size:12px;font-weight:700;color:#2a5a82;">${hasSafe?'✓':''}</td>`;
       const pTe=`<td class="cd-person" style="text-align:center;font-size:11px;font-weight:700;color:#2a5a82;">${teStr||''}</td>`;
       const pOther=`<td class="cd-person" style="font-size:8.5px;color:var(--muted);padding:3px 5px;line-height:1.4;">${p.other||''}</td>`;

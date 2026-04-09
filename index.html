@@ -1,0 +1,199 @@
+<!DOCTYPE html>
+<html lang="zh-TW">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>勞工健康服務管理系統 | 職護行政輔助工具</title>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/html2canvas/1.4.1/html2canvas.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
+    <style>
+        /* 基礎樣式保留，僅增加法律區塊樣式 */
+        *,*::before,*::after{box-sizing:border-box;margin:0;padding:0;}
+        :root{
+            --sw:295px; --acc:#3d6e94; --acc2:#2c5070; --accl:#dcedf7;
+            --hbg:#2c4a62; --sbg:#3d6e94; --bdr:#c0d0da; --text:#1a2b38;
+            --muted:#5a7080; --done:#27ae60;
+        }
+        body{font-family:'Noto Sans TC','Microsoft JhengHei',sans-serif;font-size:13px;color:var(--text);background:#eaf0f5;height:100vh;display:flex;flex-direction:column;overflow:hidden;}
+        
+        /* TOPBAR & MAIN LAYOUT (同前版本) */
+        .topbar{background:var(--hbg);color:#fff;padding:8px 14px;display:flex;align-items:center;gap:9px;flex-shrink:0;box-shadow:0 2px 8px rgba(0,0,0,.25);}
+        .main{display:flex;flex:1;overflow:hidden;}
+        .sidebar{width:var(--sw);min-width:var(--sw);background:#fff;border-right:1px solid var(--bdr);display:flex;flex-direction:column;overflow:hidden;}
+        .g-wrap-outer{flex:1;display:flex;flex-direction:column;overflow:hidden;}
+        .gantt-wrap{flex:1;overflow:auto;background:#fff;}
+
+        /* 新增：法律授權與免責聲明區塊 (Footer) */
+        .legal-footer {
+            background: #f8fafc;
+            border-top: 1px solid var(--bdr);
+            padding: 15px 20px;
+            font-size: 11px;
+            color: var(--muted);
+            line-height: 1.6;
+            flex-shrink: 0;
+        }
+        .legal-footer-grid {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 20px;
+        }
+        .legal-tag {
+            display: inline-block;
+            padding: 2px 6px;
+            background: #e2e8f0;
+            border-radius: 3px;
+            font-weight: 700;
+            margin-right: 5px;
+        }
+
+        /* 彈窗背景 (Modal) */
+        .modal-bg{display:none;position:fixed;inset:0;background:rgba(0,0,0,.5);z-index:9999;align-items:center;justify-content:center;}
+        .modal-bg.open{display:flex;}
+        .disclaimer-box {
+            background: #fff;
+            padding: 25px;
+            border-radius: 12px;
+            max-width: 450px;
+            width: 90%;
+            box-shadow: 0 20px 50px rgba(0,0,0,0.3);
+        }
+        .disclaimer-title { font-size: 16px; font-weight: 700; color: #c53030; margin-bottom: 12px; display:flex; align-items:center; gap:8px; }
+        .disclaimer-content { font-size: 13px; color: #4a5568; margin-bottom: 20px; line-height: 1.7; }
+        .disclaimer-btn { 
+            width: 100%; padding: 12px; background: var(--acc); color: #fff; border: none; 
+            border-radius: 6px; font-weight: 700; cursor: pointer; transition: background 0.2s;
+        }
+        .disclaimer-btn:hover { background: var(--acc2); }
+
+        /* 其他表格與元件樣式保留... */
+        table.gt{border-collapse:collapse;table-layout:fixed;width:100%;}
+        table.gt th,table.gt td{border:1px solid var(--bdr);padding:4px;}
+        .th1{background:var(--hbg);color:#fff;text-align:center;}
+        .mo-plan{position:absolute;top:4px;left:2px;height:11px;opacity:0.5;}
+        .mo-done{position:absolute;bottom:4px;left:2px;right:2px;height:11px;background:var(--done);}
+    </style>
+</head>
+<body>
+
+<div id="disclaimerModal" class="modal-bg">
+    <div class="disclaimer-box">
+        <div class="disclaimer-title">⚠️ 使用者同意條款</div>
+        <div class="disclaimer-content">
+            歡迎使用「勞工健康服務管理工具」。在進入前請詳閱：<br><br>
+            1. <b>資料安全</b>：本工具採本地儲存技術，資料僅存於您的瀏覽器中。請勿輸入員工姓名、身分證號等敏感個資，建議以工號代替。<br>
+            2. <b>法規效力</b>：內建提醒僅供行政輔助，業務執行應以《勞工健康保護規則》最新公告為準。<br>
+            3. <b>責任限制</b>：作者不保證軟體無誤，亦不對因使用本工具產生的法律裁罰、資料損失負損害賠償責任。
+        </div>
+        <button class="disclaimer-btn" onclick="acceptDisclaimer()">我已閱讀並同意以上條款</button>
+    </div>
+</div>
+
+<div class="topbar">
+    <div class="tb-title" id="mainTitle" contenteditable="true">勞工健康服務年度計畫管理系統</div>
+    <div class="yr-wrap">
+        <button class="yr-btn" onclick="chgYear(-1)">◀</button>
+        <div class="yr-num" id="yrNum">2026</div>
+        <button class="yr-btn" onclick="chgYear(1)">▶</button>
+    </div>
+    <button class="tb-btn prim" id="pdfBtn" onclick="exportPDF()">📄 匯出 PDF</button>
+</div>
+
+<div class="main">
+    <div class="sidebar">
+        <div class="sb-hdr">
+            <div class="sb-hdr-t">計畫列表</div>
+        </div>
+        <div id="sbList" style="flex:1; overflow-y:auto;"></div>
+    </div>
+    <div class="g-wrap-outer">
+        <div id="ganttWrap" class="gantt-wrap"></div>
+    </div>
+</div>
+
+<footer class="legal-footer">
+    <div class="legal-footer-grid">
+        <div>
+            <p><span class="legal-tag">法律聲明</span> 本軟體依「現狀」提供，不附帶任何形式的保證。在任何情況下，作者對於因使用本軟體所產生的索賠、損害或其他責任概不負責。</p>
+            <p style="margin-top: 8px;"><span class="legal-tag">智慧財產</span> 本工具邏輯基於中華民國勞動部法規開發，代碼採 MIT 授權規範公開。轉載請註明出處。</p>
+        </div>
+        <div style="text-align: right;">
+            <p>勞工健康服務年度管理工具 v2.0</p>
+            <p>作者：職護小工具分享 (@occu.patient)</p>
+            <p style="color: #cbd5e0; margin-top: 5px;">建議使用 Chrome 或 Edge 瀏覽器以獲得最佳匯出效果</p>
+        </div>
+    </div>
+</footer>
+
+<script>
+    // --- 免責聲明彈窗邏輯 ---
+    function acceptDisclaimer() {
+        sessionStorage.setItem('disclaimer_agreed', 'true');
+        document.getElementById('disclaimerModal').classList.remove('open');
+    }
+
+    window.onload = function() {
+        if (!sessionStorage.getItem('disclaimer_agreed')) {
+            document.getElementById('disclaimerModal').classList.add('open');
+        }
+        renderSB();
+    };
+
+    // --- 核心資料處理 ---
+    let curYear = 2026;
+    let projects = JSON.parse(localStorage.getItem('gp')) || [
+        {id:1, cat:'勞工健康', name:'年度計畫制定', method:'依勞服規則第12條辦理', pers:['職安'], months:[1], target:'全員', color:0, checked:true, prog:{}}
+    ];
+
+    function save(){ localStorage.setItem('gp', JSON.stringify(projects)); }
+
+    function renderSB(){
+        let h = '';
+        projects.forEach(p => {
+            h += `<div style="padding:10px; border-bottom:1px solid #eee; cursor:pointer;" onclick="togP(${p.id})">
+                <input type="checkbox" ${p.checked?'checked':''}> ${p.name}
+            </div>`;
+        });
+        document.getElementById('sbList').innerHTML = h;
+        genGantt();
+    }
+
+    function genGantt(){
+        const sel = projects.filter(p => p.checked);
+        let h = `<table class="gt"><thead><tr><th class="th1">項目</th>${Array.from({length:12},(_,i)=>`<th class="th1">${i+1}月</th>`).join('')}</tr></thead><tbody>`;
+        sel.forEach(p => {
+            h += `<tr><td>${p.name}</td>${Array.from({length:12},(_,i)=>`<td></td>`).join('')}</tr>`;
+        });
+        h += '</tbody></table>';
+        document.getElementById('ganttWrap').innerHTML = h;
+    }
+
+    function togP(id){ 
+        const p = projects.find(x => x.id === id); 
+        p.checked = !p.checked; 
+        save(); renderSB(); 
+    }
+
+    function chgYear(v){ curYear += v; document.getElementById('yrNum').textContent = curYear; genGantt(); }
+
+    // --- PDF 匯出邏輯 ---
+    async function exportPDF() {
+        const btn = document.getElementById('pdfBtn');
+        btn.textContent = '⏳ 匯出中...';
+        btn.disabled = true;
+        try {
+            const { jsPDF } = window.jspdf;
+            const canvas = await html2canvas(document.body, { scale: 2 });
+            const pdf = new jsPDF('l', 'mm', 'a4');
+            pdf.addImage(canvas.toDataURL('image/jpeg', 0.95), 'JPEG', 0, 0, 297, 210);
+            pdf.save(`計畫管理_${curYear}.pdf`);
+        } catch (e) {
+            alert('匯出失敗');
+        } finally {
+            btn.textContent = '📄 匯出 PDF';
+            btn.disabled = false;
+        }
+    }
+</script>
+</body>
+</html>

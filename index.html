@@ -3,7 +3,7 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>勞工健康服務年度計畫甘特圖</title>
+<title>職場健康服務年度計畫甘特圖</title>
 <style>
 *,*::before,*::after{box-sizing:border-box;margin:0;padding:0;}
 :root{
@@ -384,7 +384,7 @@ textarea.fi{resize:vertical;min-height:50px;}
 
 <!-- PRINT HEADER (hidden on screen, shown on print) -->
 <div class="print-hdr" id="printHdr">
-  <div class="print-hdr-t" id="printT">勞工健康服務年度計畫甘特圖</div>
+  <div class="print-hdr-t" id="printT">職場健康服務年度計畫甘特圖</div>
   <div class="print-hdr-s" id="printS">2025 年度</div>
 </div>
 
@@ -405,7 +405,7 @@ textarea.fi{resize:vertical;min-height:50px;}
   <button class="tb-btn danger" onclick="deleteProj()" title="刪除當前專案">🗑 刪除</button>
   <div class="proj-sep"></div>
   <button class="tb-btn" onclick="exportJSON()" title="下載備份 JSON">💾 備份</button>
-  <button class="tb-btn" onclick="document.getElementById('impJSON').click()" title="上傳備份 JSON">📂 還原</button>
+  <button class="tb-btn" onclick="document.getElementById('impJSON').click()" title="上傳備份 JSON">📂 上傳檔案</button>
   <input type="file" id="impJSON" accept=".json" style="display:none" onchange="importJSON(event)">
   <div class="proj-sep"></div>
   <button class="tb-btn" onclick="openLaw()">📖 法規</button>
@@ -508,11 +508,12 @@ textarea.fi{resize:vertical;min-height:50px;}
         </div>
         <div class="pcol">
           <div class="pcol-hdr">特約</div>
+          <div class="pck" data-v="特約職醫" onclick="togP(this)"><span class="pck-box"></span>特約職醫</div>
           <div class="pck" data-v="特約醫師" onclick="togP(this)"><span class="pck-box"></span>特約醫師</div>
           <div class="pck" data-v="特約護理" onclick="togP(this)"><span class="pck-box"></span>特約護理</div>
         </div>
         <div class="pcol">
-          <div class="pcol-hdr">其他人員</div>
+          <div class="pcol-hdr">其他</div>
           <textarea class="other-fi" id="fOther" placeholder="例：人資部門&#10;相關單位主管"></textarea>
         </div>
       </div>
@@ -602,14 +603,14 @@ textarea.fi{resize:vertical;min-height:50px;}
   <div class="disc-card">
     <div class="disc-badge">⚠️ 使用者同意條款</div>
     <div class="disc-title">使用本工具前，請詳閱以下條款</div>
-    <div class="disc-welcome">歡迎使用「勞工健康服務管理工具」。在進入前請詳閱以下重要聲明：</div>
+    <div class="disc-welcome">歡迎使用「職場健康服務管理工具」。在進入前請詳閱以下重要聲明：</div>
 
     <div class="disc-section">
       <div class="disc-section-hdr">
         <div class="disc-section-icon" style="background:#eef6ff;">🔒</div>
         資料安全
       </div>
-      <p>本工具採本地儲存技術（localStorage），所有資料<strong>僅存於您的瀏覽器</strong>中，不會上傳至任何伺服器。請勿輸入員工姓名、身分證號等敏感個人資料，以保障當事人隱私。</p>
+      <p>本工具採本地儲存技術（localStorage），所有資料<strong>僅存於您的瀏覽器</strong>中，不會上傳至任何伺服器。請勿輸入姓名、身分證字號等敏感個人資料，以保障當事人隱私。</p>
     </div>
 
     <div class="disc-section">
@@ -650,7 +651,7 @@ textarea.fi{resize:vertical;min-height:50px;}
 
 <!-- ══ FOOTER ══ -->
 <footer class="site-footer">
-  勞工健康服務管理工具 &nbsp;·&nbsp; 僅供個人及學術交流使用，嚴禁商業營利 &nbsp;·&nbsp;
+  職場健康服務管理工具 &nbsp;·&nbsp; 僅供個人及學術交流使用，嚴禁商業營利 &nbsp;·&nbsp;
   商業授權請洽：<a href="https://www.instagram.com/occu.patient/" target="_blank" rel="noopener noreferrer">@occu.patient</a>
 </footer>
 
@@ -737,18 +738,12 @@ try{const m=localStorage.getItem('lawMeta');if(m)lawMeta=JSON.parse(m);}catch{}
 // ── MULTI-PROJECT STORAGE SCHEMA ──
 // localStorage['gp_all'] = { currentProj: 'name', projects: { name: {year, items, nid} } }
 const DP=[
-  {id:1,law:['art12'],cat:'勞工健康服務',name:'勞工健康服務年度計畫檢討與制定',method:'制定本年度勞工健康服務年度計畫及評價',pers:['職安'],other:'',months:[1,12],target:'全員',color:0,checked:true,prog:{}},
-  {id:2,law:['art16'],cat:'健康檢查',name:'新進人員一般體格檢查',method:'新進人員一般體格檢查（依附表九）',pers:['職安'],other:'人資部門',months:[1,2,3,4,5,6,7,8,9,10,11,12],target:'新進人員',color:1,checked:true,prog:{}},
-  {id:3,law:['art17'],cat:'健康檢查',name:'實施在職人員一般健康檢查',method:'實施在職人員定期一般健康檢查（依附表九、十一）',pers:['職安'],other:'相關單位主管',months:[6,7],target:'全員',color:1,checked:true,prog:{}},
-  {id:4,law:['art18'],cat:'健康檢查',name:'實施在職人員特殊健康檢查',method:'實施從事特別危害健康作業人員特殊健康檢查（依附表十）',pers:['職安'],other:'相關單位主管',months:[5,6],target:'特作人員',color:1,checked:false,prog:{}},
-  {id:5,law:['art9k1'],cat:'健康管理',name:'健康檢查紀錄分析、評估、管理與保存',method:'一般/特殊/體格健康檢查紀錄之分析、評估、健康管理及資料保存',pers:['職安'],other:'',months:[1,2,3,4,5,6,7,8,9,10,11,12],target:'全員',color:2,checked:true,prog:{}},
-  {id:6,law:['art21'],cat:'健康管理',name:'特殊健康檢查健康分級',method:'勞工特殊健康檢查結果依第21條規定實施一至四級健康分級管理',pers:['特約醫師','特約護理'],other:'',months:[8,9],target:'全員',color:2,checked:true,prog:{}},
-  {id:7,law:['art9k2','art23'],cat:'健康管理',name:'依健康檢查結果適性配工',method:'依一般/特殊/體格健康檢查結果適性配工',pers:['職安','特約醫師'],other:'相關單位主管',months:[8,9],target:'全員',color:2,checked:true,prog:{}},
-  {id:8,law:['art9k3'],cat:'健康管理',name:'健康檢查異常追蹤管理及健康指導',method:'勞工一般健康檢查結果異常之追蹤管理及健康指導',pers:['職安'],other:'',months:[9,10],target:'全員',color:2,checked:true,prog:{}},
-  {id:9,law:['art9k4','art23'],cat:'健康管理',name:'中高齡員工評估與適性配工',method:'辦理中高齡及高齡勞工健康評估、職能評估與適性配工',pers:['職安','特約醫師'],other:'相關單位主管',months:[8,9],target:'全員',color:2,checked:false,prog:{}},
-  {id:10,law:['art21'],cat:'健康管理',name:'協助追蹤特殊健檢三級人員重新判級',method:'追蹤特殊健康檢查三級管理人員，安排職業醫學科專科醫師重新評估判級',pers:['職安'],other:'',months:[8,9],target:'特作人員',color:3,checked:true,prog:{}},
-  {id:11,law:['art9k6'],cat:'健康促進',name:'勞工健康促進計畫策劃及實施',method:'辦理健康教育、衛生指導、身心健康保護及健康促進活動',pers:['職安'],other:'',months:[3,6,9,12],target:'全員',color:4,checked:false,prog:{}},
-  {id:12,law:['art8'],cat:'勞工健康服務',name:'醫護人員在職教育訓練',method:'安排醫護人員及勞工健康服務相關人員接受在職教育訓練（每三年至少12小時）',pers:['職安'],other:'',months:[6,11],target:'醫護人員',color:5,checked:false,prog:{}},
+  {id:1,law:['art12'],cat:'健康服務行政管理',name:'勞工健康服務年度計畫檢討與制定',method:'制定本年度勞工健康服務年度計畫及評價',pers:['職安'],other:'',months:[1,12],target:'全員',color:0,checked:true,prog:{}},
+  {id:1,law:['art12'],cat:'健康服務行政管理',name:'勞工健康服務年度計畫評值',method:'依據年度執行成果進行計畫評值',pers:['特約護理'],other:'',months:[1,12],target:'',color:0,checked:true,prog:{}},
+  {id:2,law:['art16'],cat:'職場健康管理',name:'新進人員體格檢查',method:'新進人員一般體格檢查（依附表九）',pers:['職安'],other:'人資部門',months:[1,2,3,4,5,6,7,8,9,10,11,12],target:'新進人員',color:1,checked:true,prog:{}},
+  {id:4,law:['art18'],cat:'職場健康管理',name:'在職特作健康檢查',method:'實施從事特別危害健康作業人員特殊健康檢查（依附表十）',pers:['職安'],other:'相關單位主管',months:[5,6],target:'特作人員',color:1,checked:false,prog:{}},
+  {id:9,law:['art9k4','art23'],cat:'四大計畫',name:'母性健康保護管理',method:'辦理妊娠中及產後女性員工健康評估、職能評估與適性配工',pers:['職安','特約醫師'],other:'相關單位主管',months:[8,9],target:'母性保護對象',color:2,checked:false,prog:{}},
+  {id:11,law:['art9k6'],cat:'職場健康促進',name:'職場健康促進',method:'依據健檢分析結果、流行病學、時事，辦理健康促進活動',pers:['職安'],other:'',months:[3,6,9,12],target:'全員',color:4,checked:false,prog:{}},
 ];
 const DEFAULT_PROJ_NAME='預設專案';
 

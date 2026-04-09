@@ -26,6 +26,32 @@ body{font-family:'Noto Sans TC','Microsoft JhengHei',sans-serif;font-size:13px;c
 .tb-btn:hover{background:rgba(255,255,255,.22);}
 .tb-btn.prim{background:rgba(255,255,255,.88);color:var(--hbg);}
 .tb-btn.prim:hover{background:#fff;}
+.tb-btn.danger{background:rgba(220,60,60,.25);border-color:rgba(255,120,120,.5);}
+.tb-btn.danger:hover{background:rgba(220,60,60,.4);}
+
+/* PROJECT SELECTOR */
+.proj-sep{width:1px;height:22px;background:rgba(255,255,255,.2);flex-shrink:0;}
+.proj-select{
+  padding:4px 8px;border-radius:4px;
+  border:1px solid rgba(255,255,255,.35);
+  background:rgba(255,255,255,.12);color:#fff;
+  font-family:inherit;font-size:11px;cursor:pointer;
+  max-width:160px;outline:none;
+}
+.proj-select option{background:#2c4a62;color:#fff;}
+.proj-select:focus{border-color:rgba(255,255,255,.6);}
+
+/* RENAME MODAL */
+.rename-bg{display:none;position:fixed;inset:0;background:rgba(0,0,0,.4);z-index:8000;align-items:center;justify-content:center;}
+.rename-bg.open{display:flex;}
+.rename-card{background:#fff;border-radius:10px;padding:22px 24px;width:360px;box-shadow:0 16px 50px rgba(0,0,0,.2);}
+.rename-title{font-size:14px;font-weight:700;color:var(--text);margin-bottom:14px;}
+.rename-input{width:100%;padding:8px 10px;border:1px solid var(--bdr);border-radius:5px;font-family:inherit;font-size:13px;color:var(--text);outline:none;}
+.rename-input:focus{border-color:var(--acc);}
+.rename-acts{display:flex;gap:8px;margin-top:14px;justify-content:flex-end;}
+.rename-btn{padding:7px 16px;border-radius:5px;border:none;cursor:pointer;font-family:inherit;font-size:12px;font-weight:600;}
+.rename-btn.ok{background:var(--acc);color:#fff;}
+.rename-btn.cc{background:#f0f4f7;color:var(--muted);}
 
 /* LAYOUT */
 .main{display:flex;flex:1;overflow:hidden;}
@@ -371,6 +397,17 @@ textarea.fi{resize:vertical;min-height:50px;}
     <div class="yr-num" id="yrNum">2025</div>
     <button class="yr-btn" onclick="chgYear(1)">▶</button>
   </div>
+  <div class="proj-sep"></div>
+  <!-- 專案選擇器 -->
+  <select class="proj-select" id="projSelect" onchange="switchProj(this.value)" title="切換專案"></select>
+  <button class="tb-btn" onclick="newProj()" title="建立新專案">＋ 新專案</button>
+  <button class="tb-btn" onclick="renameProj()" title="重新命名當前專案">✏️ 重命名</button>
+  <button class="tb-btn danger" onclick="deleteProj()" title="刪除當前專案">🗑 刪除</button>
+  <div class="proj-sep"></div>
+  <button class="tb-btn" onclick="exportJSON()" title="下載備份 JSON">💾 備份</button>
+  <button class="tb-btn" onclick="document.getElementById('impJSON').click()" title="上傳備份 JSON">📂 還原</button>
+  <input type="file" id="impJSON" accept=".json" style="display:none" onchange="importJSON(event)">
+  <div class="proj-sep"></div>
   <button class="tb-btn" onclick="openLaw()">📖 法規</button>
   <button class="tb-btn" onclick="exportPDF()" id="pdfBtn">📄 匯出 PDF</button>
   <button class="tb-btn prim" onclick="genGantt()">🗓 產生甘特圖</button>
@@ -548,6 +585,18 @@ textarea.fi{resize:vertical;min-height:50px;}
 </div>
 </div>
 
+<!-- ══ RENAME PROJECT MODAL ══ -->
+<div class="rename-bg" id="renameBg">
+  <div class="rename-card">
+    <div class="rename-title">重新命名專案</div>
+    <input class="rename-input" id="renameInput" placeholder="輸入新的專案名稱" onkeydown="if(event.key==='Enter')doRename()">
+    <div class="rename-acts">
+      <button class="rename-btn cc" onclick="document.getElementById('renameBg').classList.remove('open')">取消</button>
+      <button class="rename-btn ok" onclick="doRename()">確定</button>
+    </div>
+  </div>
+</div>
+
 <!-- ══ DISCLAIMER MODAL ══ -->
 <div class="disc-bg" id="discBg">
   <div class="disc-card">
@@ -577,6 +626,14 @@ textarea.fi{resize:vertical;min-height:50px;}
         責任限制
       </div>
       <p>本工具開放<strong>個人及學術交流使用</strong>。<strong>嚴禁</strong>任何形式之商業營利、轉售或納入任何付費形式之產品或服務。作者不對因使用本工具所產生之法律責任或資料損失負損害賠償責任。</p>
+    </div>
+
+    <div class="disc-section">
+      <div class="disc-section-hdr">
+        <div class="disc-section-icon" style="background:#eef8f0;">📁</div>
+        資料隔離建議
+      </div>
+      <p>本工具支援<strong>多專案管理功能</strong>，建議使用「新專案」功能區隔不同事業單位的資料，避免混用。所有資料僅存於本機瀏覽器，請定期使用「備份」功能下載 JSON 檔案以防資料遺失。</p>
     </div>
 
     <div class="disc-footer-note">
@@ -677,6 +734,8 @@ let selMonths=[], selPers=[], selColor=0, selLawIds=[];
 let LAWS=JSON.parse(localStorage.getItem('lawDb')||JSON.stringify(DEFAULT_LAWS));
 try{const m=localStorage.getItem('lawMeta');if(m)lawMeta=JSON.parse(m);}catch{}
 
+// ── MULTI-PROJECT STORAGE SCHEMA ──
+// localStorage['gp_all'] = { currentProj: 'name', projects: { name: {year, items, nid} } }
 const DP=[
   {id:1,law:['art12'],cat:'勞工健康服務',name:'勞工健康服務年度計畫檢討與制定',method:'制定本年度勞工健康服務年度計畫及評價',pers:['職安'],other:'',months:[1,12],target:'全員',color:0,checked:true,prog:{}},
   {id:2,law:['art16'],cat:'健康檢查',name:'新進人員一般體格檢查',method:'新進人員一般體格檢查（依附表九）',pers:['職安'],other:'人資部門',months:[1,2,3,4,5,6,7,8,9,10,11,12],target:'新進人員',color:1,checked:true,prog:{}},
@@ -691,10 +750,160 @@ const DP=[
   {id:11,law:['art9k6'],cat:'健康促進',name:'勞工健康促進計畫策劃及實施',method:'辦理健康教育、衛生指導、身心健康保護及健康促進活動',pers:['職安'],other:'',months:[3,6,9,12],target:'全員',color:4,checked:false,prog:{}},
   {id:12,law:['art8'],cat:'勞工健康服務',name:'醫護人員在職教育訓練',method:'安排醫護人員及勞工健康服務相關人員接受在職教育訓練（每三年至少12小時）',pers:['職安'],other:'',months:[6,11],target:'醫護人員',color:5,checked:false,prog:{}},
 ];
+const DEFAULT_PROJ_NAME='預設專案';
 
-let projects=JSON.parse(localStorage.getItem('gp')||JSON.stringify(DP));
-let nid=Math.max(...projects.map(p=>p.id))+1;
-function save(){localStorage.setItem('gp',JSON.stringify(projects));}
+function _loadStore(){
+  try{return JSON.parse(localStorage.getItem('gp_all'))||null;}catch{return null;}
+}
+function _saveStore(store){localStorage.setItem('gp_all',JSON.stringify(store));}
+
+function _initStore(){
+  let store=_loadStore();
+  // Migrate legacy 'gp' key
+  if(!store){
+    const legacyRaw=localStorage.getItem('gp');
+    const legacyItems=legacyRaw?JSON.parse(legacyRaw):DP;
+    const legacyNid=Math.max(...legacyItems.map(p=>p.id))+1;
+    store={currentProj:DEFAULT_PROJ_NAME,projects:{[DEFAULT_PROJ_NAME]:{year:2025,items:legacyItems,nid:legacyNid}}};
+    _saveStore(store);
+    if(legacyRaw)localStorage.removeItem('gp');
+  }
+  // Ensure currentProj exists
+  if(!store.projects[store.currentProj]){
+    store.currentProj=Object.keys(store.projects)[0]||DEFAULT_PROJ_NAME;
+    if(!store.projects[store.currentProj])store.projects[store.currentProj]={year:2025,items:JSON.parse(JSON.stringify(DP)),nid:13};
+    _saveStore(store);
+  }
+  return store;
+}
+
+let _store=_initStore();
+let curProjName=_store.currentProj;
+let projects=[..._store.projects[curProjName].items];
+let nid=_store.projects[curProjName].nid||13;
+curYear=_store.projects[curProjName].year||2025;
+
+function save(){
+  _store.projects[curProjName].items=projects;
+  _store.projects[curProjName].nid=nid;
+  _store.projects[curProjName].year=curYear;
+  _store.currentProj=curProjName;
+  _saveStore(_store);
+}
+
+// ── PROJECT MANAGEMENT ──
+function renderProjSelect(){
+  const sel=document.getElementById('projSelect');
+  const names=Object.keys(_store.projects);
+  sel.innerHTML=names.map(n=>`<option value="${n.replace(/"/g,'&quot;')}"${n===curProjName?' selected':''}>${n}</option>`).join('');
+}
+
+function switchProj(name){
+  save(); // save current before switching
+  curProjName=name;
+  _store.currentProj=name;
+  const p=_store.projects[name];
+  projects=[...p.items];
+  nid=p.nid||Math.max(...projects.map(x=>x.id),0)+1;
+  curYear=p.year||new Date().getFullYear();
+  document.getElementById('yrNum').textContent=curYear;
+  _saveStore(_store);
+  renderProjSelect();
+  renderSB();
+  genGantt();
+}
+
+function newProj(){
+  const name=prompt('請輸入新專案名稱：','新專案 '+(Object.keys(_store.projects).length+1));
+  if(!name||!name.trim())return;
+  const n=name.trim();
+  if(_store.projects[n]){alert(`專案「${n}」已存在`);return;}
+  _store.projects[n]={year:new Date().getFullYear(),items:[],nid:1};
+  switchProj(n);
+}
+
+function renameProj(){
+  document.getElementById('renameInput').value=curProjName;
+  document.getElementById('renameBg').classList.add('open');
+  setTimeout(()=>document.getElementById('renameInput').select(),50);
+}
+
+function doRename(){
+  const newName=document.getElementById('renameInput').value.trim();
+  if(!newName){alert('請輸入名稱');return;}
+  if(newName===curProjName){document.getElementById('renameBg').classList.remove('open');return;}
+  if(_store.projects[newName]){alert(`專案「${newName}」已存在`);return;}
+  const data=_store.projects[curProjName];
+  _store.projects[newName]=data;
+  delete _store.projects[curProjName];
+  curProjName=newName;
+  _store.currentProj=newName;
+  _saveStore(_store);
+  document.getElementById('renameBg').classList.remove('open');
+  renderProjSelect();
+}
+
+function deleteProj(){
+  const names=Object.keys(_store.projects);
+  if(names.length<=1){alert('至少需要保留一個專案，無法刪除。');return;}
+  if(!confirm(`確定刪除專案「${curProjName}」？\n此操作無法復原。`))return;
+  delete _store.projects[curProjName];
+  const next=Object.keys(_store.projects)[0];
+  switchProj(next);
+}
+
+// ── JSON BACKUP / RESTORE ──
+function exportJSON(){
+  const data={version:2,exportDate:new Date().toISOString(),projectName:curProjName,projectData:_store.projects[curProjName],year:curYear};
+  const a=document.createElement('a');
+  a.href=URL.createObjectURL(new Blob([JSON.stringify(data,null,2)],{type:'application/json'}));
+  a.download=`${curProjName}_${curYear}_備份.json`;
+  a.click();
+}
+
+function importJSON(e){
+  const f=e.target.files[0];if(!f)return;
+  const r=new FileReader();
+  r.onload=ev=>{
+    try{
+      const d=JSON.parse(ev.target.result);
+      let name,data;
+      if(d.version===2&&d.projectData){
+        // New format: single project backup
+        name=d.projectName||f.name.replace('.json','');
+        data=d.projectData;
+      } else if(d.projects){
+        // Legacy full export
+        const keys=Object.keys(d.projects);
+        if(!keys.length){alert('備份檔案內無專案資料');return;}
+        name=keys[0];data=d.projects[name];
+      } else if(Array.isArray(d)){
+        // Raw items array
+        name=f.name.replace('.json','').replace(/_備份.*/,'');
+        data={year:new Date().getFullYear(),items:d,nid:Math.max(...d.map(p=>p.id),0)+1};
+      } else if(d.items&&Array.isArray(d.items)){
+        name=d.projectName||f.name.replace('.json','');
+        data=d;
+      } else {alert('格式不符，無法匯入');return;}
+      // Avoid overwrite without confirmation
+      let finalName=name;
+      if(_store.projects[finalName]){
+        const choice=confirm(`專案「${finalName}」已存在。\n確定覆蓋請按確定，取消則另存新名稱。`);
+        if(!choice){
+          const nn=prompt('請輸入新名稱：',finalName+' (還原)');
+          if(!nn||!nn.trim())return;
+          finalName=nn.trim();
+        }
+      }
+      _store.projects[finalName]=data;
+      _saveStore(_store);
+      switchProj(finalName);
+      alert(`✓ 已還原專案「${finalName}」`);
+    }catch(err){alert('匯入失敗：'+err.message);}
+    e.target.value='';
+  };
+  r.readAsText(f,'UTF-8');
+}
 
 // ═══════════ HELPERS ═══════════
 function getLaws(ids){return(ids||[]).map(id=>{const a=LAWS.find(x=>x.id===id);return a?a.art:'';}).filter(Boolean);}
@@ -763,7 +972,7 @@ function ds(e,i){dragI=i;e.currentTarget.classList.add('dragging');e.dataTransfe
 function dov(e,i){e.preventDefault();document.querySelectorAll('.pitem').forEach(el=>el.classList.remove('drag-over'));if(i!==dragI)document.querySelectorAll('.pitem')[i]?.classList.add('drag-over');}
 function ddr(e,i){e.preventDefault();if(dragI===null||dragI===i)return;const m=projects.splice(dragI,1)[0];projects.splice(i,0,m);dragI=null;save();renderSB();}
 function dde(){document.querySelectorAll('.pitem').forEach(el=>el.classList.remove('dragging','drag-over'));dragI=null;}
-function chgYear(d){curYear+=d;document.getElementById('yrNum').textContent=curYear;}
+function chgYear(d){curYear+=d;document.getElementById('yrNum').textContent=curYear;save();}
 
 // ═══════════ GANTT ═══════════
 function genGantt(){
@@ -849,8 +1058,9 @@ function genGantt(){
   w.innerHTML=h;
 
   // update print header
-  document.getElementById('printT').textContent=`勞工健康服務 ${curYear} 年度計畫甘特圖`;
-  document.getElementById('printS').textContent=`${curYear} 年度　共 ${sel.length} 項計畫　列印：${new Date().toLocaleDateString('zh-TW')}`;
+  const mainT=document.getElementById('mainTitle').textContent.trim();
+  document.getElementById('printT').textContent=`${mainT}`;
+  document.getElementById('printS').textContent=`專案：${curProjName}　${curYear} 年度　共 ${sel.length} 項計畫　列印：${new Date().toLocaleDateString('zh-TW')}`;
 }
 
 // ═══════════ PROGRESS POPUP ═══════════
@@ -1065,7 +1275,7 @@ async function exportPDF(){
     const hdr=document.createElement('div');
     hdr.style.cssText='text-align:center;padding:10px 0 6px;border-bottom:2px solid #2c4a62;margin-bottom:8px;';
     hdr.innerHTML=`<div style="font-size:16px;font-weight:700;color:#2c4a62;">${titleText}</div>
-      <div style="font-size:10px;color:#5a7080;margin-top:3px;">${curYear} 年度 &nbsp;·&nbsp; 列印日期：${new Date().toLocaleDateString('zh-TW')}</div>`;
+      <div style="font-size:10px;color:#5a7080;margin-top:3px;">專案：${curProjName}　${curYear} 年度 &nbsp;·&nbsp; 列印日期：${new Date().toLocaleDateString('zh-TW')}</div>`;
     container.appendChild(hdr);
 
     // Legend
@@ -1163,6 +1373,7 @@ function loadScript(src){
 // ═══════════ EVENTS ═══════════
 document.getElementById('modalBg').addEventListener('click',e=>{if(e.target===document.getElementById('modalBg'))closeModal();});
 document.getElementById('lawBg').addEventListener('click',e=>{if(e.target===document.getElementById('lawBg'))closeLaw();});
+document.getElementById('renameBg').addEventListener('click',e=>{if(e.target===document.getElementById('renameBg'))document.getElementById('renameBg').classList.remove('open');});
 document.addEventListener('click',e=>{
   if(!document.getElementById('lsBox').contains(e.target)&&e.target.id!=='fLawQ')document.getElementById('lsBox').classList.remove('open');
   const pp=document.getElementById('pp');
@@ -1193,6 +1404,9 @@ document.getElementById('mainTitle').addEventListener('blur',()=>{localStorage.s
 document.getElementById('mainTitle').addEventListener('keydown',e=>{if(e.key==='Enter'){e.preventDefault();document.getElementById('mainTitle').blur();}});
 document.getElementById('sidebarTitle').addEventListener('blur',()=>{localStorage.setItem('ganttSbTitle',document.getElementById('sidebarTitle').textContent.trim());});
 
+// Init project selector & year display
+document.getElementById('yrNum').textContent=curYear;
+renderProjSelect();
 renderCrow();
 renderSB();
 genGantt();

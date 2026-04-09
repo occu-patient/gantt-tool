@@ -760,14 +760,14 @@ function _initStore(){
     const legacyRaw=localStorage.getItem('gp');
     const legacyItems=legacyRaw?JSON.parse(legacyRaw):DP;
     const legacyNid=Math.max(...legacyItems.map(p=>p.id))+1;
-    store={currentProj:DEFAULT_PROJ_NAME,projects:{[DEFAULT_PROJ_NAME]:{year:2025,items:legacyItems,nid:legacyNid}}};
+    store={currentProj:DEFAULT_PROJ_NAME,projects:{[DEFAULT_PROJ_NAME]:{year:2026,items:legacyItems,nid:legacyNid}}};
     _saveStore(store);
     if(legacyRaw)localStorage.removeItem('gp');
   }
   // Ensure currentProj exists
   if(!store.projects[store.currentProj]){
     store.currentProj=Object.keys(store.projects)[0]||DEFAULT_PROJ_NAME;
-    if(!store.projects[store.currentProj])store.projects[store.currentProj]={year:2025,items:JSON.parse(JSON.stringify(DP)),nid:13};
+    if(!store.projects[store.currentProj])store.projects[store.currentProj]={year:2026,items:JSON.parse(JSON.stringify(DP)),nid:13};
     _saveStore(store);
   }
   return store;
@@ -777,7 +777,7 @@ let _store=_initStore();
 let curProjName=_store.currentProj;
 let projects=[..._store.projects[curProjName].items];
 let nid=_store.projects[curProjName].nid||13;
-curYear=_store.projects[curProjName].year||2025;
+curYear=_store.projects[curProjName].year||2026;
 
 function save(){
   _store.projects[curProjName].items=projects;
@@ -1015,10 +1015,10 @@ function genGantt(){
 
       // Person — 3 separate tds, no repeated sub-labels
       const hasSafe=(p.pers||[]).includes('職安');
-      const hasDr=(p.pers||[]).includes('特約職醫');
-      const hasDO=(p.pers||[]).includes('特約醫師');
+      const hasDo=(p.pers||[]).includes('特約職醫');
+      const hasDr=(p.pers||[]).includes('特約醫師');
       const hasNr=(p.pers||[]).includes('特約護理');
-      const teStr=[hasDr?'職醫':'',hasDO?'醫':'',hasNr?'護':''].filter(Boolean).join('.');
+      const teStr=[hasDo?'職醫':'',hasDr?'醫':'',hasNr?'護':''].filter(Boolean).join('.');
       const pSafe=`<td class="cd-person" style="text-align:center;font-size:12px;font-weight:700;color:#2a5a82;">${hasSafe?'✓':''}</td>`;
       const pTe=`<td class="cd-person" style="text-align:center;font-size:11px;font-weight:700;color:#2a5a82;">${teStr||''}</td>`;
       const pOther=`<td class="cd-person" style="font-size:8.5px;color:var(--muted);padding:3px 5px;line-height:1.4;">${p.other||''}</td>`;

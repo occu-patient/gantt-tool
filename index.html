@@ -3,7 +3,7 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>職場健康服務年度計畫甘特圖</title>
+<title>勞工健康服務年度計畫甘特圖</title>
 <style>
 *,*::before,*::after{box-sizing:border-box;margin:0;padding:0;}
 :root{
@@ -384,8 +384,8 @@ textarea.fi{resize:vertical;min-height:50px;}
 
 <!-- PRINT HEADER (hidden on screen, shown on print) -->
 <div class="print-hdr" id="printHdr">
-  <div class="print-hdr-t" id="printT">職場健康服務年度計畫甘特圖</div>
-  <div class="print-hdr-s" id="printS">2026 年度</div>
+  <div class="print-hdr-t" id="printT">勞工健康服務年度計畫甘特圖</div>
+  <div class="print-hdr-s" id="printS">2025 年度</div>
 </div>
 
 <div class="topbar">
@@ -394,7 +394,7 @@ textarea.fi{resize:vertical;min-height:50px;}
   </div>
   <div class="yr-wrap">
     <button class="yr-btn" onclick="chgYear(-1)">◀</button>
-    <div class="yr-num" id="yrNum">2026</div>
+    <div class="yr-num" id="yrNum">2025</div>
     <button class="yr-btn" onclick="chgYear(1)">▶</button>
   </div>
   <div class="proj-sep"></div>
@@ -513,7 +513,7 @@ textarea.fi{resize:vertical;min-height:50px;}
           <div class="pck" data-v="特約護理" onclick="togP(this)"><span class="pck-box"></span>特約護理</div>
         </div>
         <div class="pcol">
-          <div class="pcol-hdr">其他</div>
+          <div class="pcol-hdr">其他人員</div>
           <textarea class="other-fi" id="fOther" placeholder="例：人資部門&#10;相關單位主管"></textarea>
         </div>
       </div>
@@ -603,7 +603,7 @@ textarea.fi{resize:vertical;min-height:50px;}
   <div class="disc-card">
     <div class="disc-badge">⚠️ 使用者同意條款</div>
     <div class="disc-title">使用本工具前，請詳閱以下條款</div>
-    <div class="disc-welcome">歡迎使用「職場健康服務管理工具」。在進入前請詳閱以下重要聲明：</div>
+    <div class="disc-welcome">歡迎使用「勞工健康服務管理工具」。在進入前請詳閱以下重要聲明：</div>
 
     <div class="disc-section">
       <div class="disc-section-hdr">
@@ -651,7 +651,7 @@ textarea.fi{resize:vertical;min-height:50px;}
 
 <!-- ══ FOOTER ══ -->
 <footer class="site-footer">
-  職場健康服務管理工具 &nbsp;·&nbsp; 僅供個人及學術交流使用，嚴禁商業營利 &nbsp;·&nbsp;
+  勞工健康服務管理工具 &nbsp;·&nbsp; 僅供個人及學術交流使用，嚴禁商業營利 &nbsp;·&nbsp;
   商業授權請洽：<a href="https://www.instagram.com/occu.patient/" target="_blank" rel="noopener noreferrer">@occu.patient</a>
 </footer>
 
@@ -754,67 +754,97 @@ try{const m=localStorage.getItem('lawMeta');if(m)lawMeta=JSON.parse(m);}catch{}
 // ══════════════════════════════════════════════════════════
 const DP = [
 
-  // ── 健康服務行政管理 ────────────────────────────────────────
+  // ── 勞工健康服務 ────────────────────────────────────────
   {
-    id:1, law:['art12'], cat:'健康服務行政管理',
-    name:'職場健康服務年度計畫討論與訂定',
-    method:'制定本年度勞工健康服務年度計畫',
+    id:1, law:['art12'], cat:'勞工健康服務',
+    name:'勞工健康服務年度計畫檢討與制定',
+    method:'制定本年度勞工健康服務年度計畫及評價',
     pers:['職安'], other:'', months:[1,12],
     target:'全員', color:0, checked:true, prog:{}
   },
   {
-    id:2, law:['art12'], cat:'健康服務行政管理',
-    name:'職場健康服務年度計畫評值',
-    method:'評值職場健康服務年度計畫執行成果',
+    id:12, law:['art8'], cat:'勞工健康服務',
+    name:'醫護人員在職教育訓練',
+    method:'安排醫護人員及勞工健康服務相關人員接受在職教育訓練（每三年至少12小時）',
     pers:['職安'], other:'', months:[6,11],
     target:'醫護人員', color:5, checked:false, prog:{}
   },
 
-  // ── 體格及健康檢查 ────────────────────────────────────────────
-    {
-    id:3, law:['art17'], cat:'體格及健康檢查',
-    name:'新進一般體格檢查',
-    method:'實施新進一般體格檢查（依附表九、十一）',
-    pers:['職安','特約醫師','特約護理'], other:'相關單位主管', months:[1,2,3,4,5,6,7,8,9,10,11,12],
+  // ── 健康檢查 ────────────────────────────────────────────
+  {
+    id:2, law:['art16'], cat:'健康檢查',
+    name:'新進人員一般體格檢查',
+    method:'新進人員一般體格檢查（依附表九）',
+    pers:['職安'], other:'人資部門',
+    months:[1,2,3,4,5,6,7,8,9,10,11,12],
     target:'新進人員', color:1, checked:true, prog:{}
   },
   {
-    id:4, law:['art18'], cat:'體格及健康檢查',
-    name:'在職人員特作健康檢查',
+    id:3, law:['art17'], cat:'健康檢查',
+    name:'實施在職人員一般健康檢查',
+    method:'實施在職人員定期一般健康檢查（依附表九、十一）',
+    pers:['職安'], other:'相關單位主管', months:[6,7],
+    target:'全員', color:1, checked:true, prog:{}
+  },
+  {
+    id:4, law:['art18'], cat:'健康檢查',
+    name:'實施在職人員特殊健康檢查',
     method:'實施從事特別危害健康作業人員特殊健康檢查（依附表十）',
-    pers:['職安','特約醫師','特約護理'], other:'', months:[7,8],
+    pers:['職安'], other:'相關單位主管', months:[5,6],
     target:'特作人員', color:1, checked:false, prog:{}
   },
-   {
-    id:5, law:['art21'], cat:'體格及健康檢查',
-    name:'特作健檢三級複判',
+
+  // ── 健康管理 ────────────────────────────────────────────
+  {
+    id:5, law:['art9k1'], cat:'健康管理',
+    name:'健康檢查紀錄分析、評估、管理與保存',
+    method:'一般/特殊/體格健康檢查紀錄之分析、評估、健康管理及資料保存',
+    pers:['職安'], other:'',
+    months:[1,2,3,4,5,6,7,8,9,10,11,12],
+    target:'全員', color:2, checked:true, prog:{}
+  },
+  {
+    id:6, law:['art21'], cat:'健康管理',
+    name:'特殊健康檢查健康分級',
+    method:'勞工特殊健康檢查結果依第21條規定實施一至四級健康分級管理',
+    pers:['特約醫師','特約護理'], other:'', months:[8,9],
+    target:'全員', color:2, checked:true, prog:{}
+  },
+  {
+    id:7, law:['art9k2','art23'], cat:'健康管理',
+    name:'依健康檢查結果適性配工',
+    method:'依一般/特殊/體格健康檢查結果適性配工',
+    pers:['職安','特約醫師'], other:'相關單位主管', months:[8,9],
+    target:'全員', color:2, checked:true, prog:{}
+  },
+  {
+    id:8, law:['art9k3'], cat:'健康管理',
+    name:'健康檢查異常追蹤管理及健康指導',
+    method:'勞工一般健康檢查結果異常之追蹤管理及健康指導',
+    pers:['職安'], other:'', months:[9,10],
+    target:'全員', color:2, checked:true, prog:{}
+  },
+  {
+    id:9, law:['art9k4','art23'], cat:'健康管理',
+    name:'中高齡員工評估與適性配工',
+    method:'辦理中高齡及高齡勞工健康評估、職能評估與適性配工',
+    pers:['職安','特約醫師'], other:'相關單位主管', months:[8,9],
+    target:'全員', color:2, checked:false, prog:{}
+  },
+  {
+    id:10, law:['art21'], cat:'健康管理',
+    name:'協助追蹤特殊健檢三級人員重新判級',
     method:'追蹤特殊健康檢查三級管理人員，安排職業醫學科專科醫師重新評估判級',
-    pers:['職安','特約醫師','特約護理'], other:'', months:[8,9],
+    pers:['職安'], other:'', months:[8,9],
     target:'特作人員', color:3, checked:true, prog:{}
   },
 
-  // ── 四大計畫健康管理 ────────────────────────────────────────────
-   {
-    id:6, law:['art9','art9k4'], cat:'四大計畫健康管理',
-    name:'母性健康保護與管理',
-    method:'辦理妊娠中或分娩後未滿一年之女性勞工，以及分娩滿一年後仍持續哺乳者職場危害預防、健康評估與管理',
-    pers:['職安','特約醫師','特約護理'], other:'相關單位主管', months:[1,2,3,4,5,6,7,8,9,10,11,12],
-    target:'女性員工', color:2, checked:false, prog:{}
-  },
+  // ── 健康促進 ────────────────────────────────────────────
   {
-    id:7, law:['art21'], cat:'四大計畫健康管理',
-    name:'重複性作業等促發肌肉骨骼疾病預防',
-    method:'辦理重複性作業等促發肌肉骨骼疾病預防健康評估、職能評估與適性配工',
-    pers:['職安','特約醫師','特約護理'], other:'', months:[8,9],
-    target:'全員', color:3, checked:true, prog:{}
-  },
-
-  // ── 職場健康促進 ────────────────────────────────────────────
-  {
-    id:8, law:['art9k6'], cat:'職場健康促',
-    name:'職場健康促進',
-    method:'依據健檢結果、流行病學、時事辦理健康促進活動',
-    pers:['職安','特約護理'], other:'', months:[3,6,9,12],
+    id:11, law:['art9k6'], cat:'健康促進',
+    name:'勞工健康促進計畫策劃及實施',
+    method:'辦理健康教育、衛生指導、身心健康保護及健康促進活動',
+    pers:['職安'], other:'', months:[3,6,9,12],
     target:'全員', color:4, checked:false, prog:{}
   },
 
@@ -1140,7 +1170,7 @@ function genGantt(){
       const hasSafe=(p.pers||[]).includes('職安');
       const hasDr=(p.pers||[]).includes('特約醫師');
       const hasNr=(p.pers||[]).includes('特約護理');
-      const teStr=[hasDr?'醫':'',hasNr?'護':''].filter(Boolean).join('.');
+      const teStr=[hasDr?'醫':'',hasNr?'護':''].filter(Boolean).join('/');
       const pSafe=`<td class="cd-person" style="text-align:center;font-size:12px;font-weight:700;color:#2a5a82;">${hasSafe?'✓':''}</td>`;
       const pTe=`<td class="cd-person" style="text-align:center;font-size:11px;font-weight:700;color:#2a5a82;">${teStr||''}</td>`;
       const pOther=`<td class="cd-person" style="font-size:8.5px;color:var(--muted);padding:3px 5px;line-height:1.4;">${p.other||''}</td>`;
